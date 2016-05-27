@@ -24,6 +24,40 @@ func valueEqu(v1, v2 interface{}) bool {
 	}
 }
 
+//根据指定的key顺序，返回值的数组
+func ValuesByKeys(val map[string]interface{}, keys ...string) []interface{} {
+	rev := []interface{}{}
+	for _, v := range keys {
+		rev = append(rev, val[v])
+	}
+	return rev
+}
+
+//翻译字段名，如果maps为nil，则原样返回，否则仅返回有对照的属性
+func Trans(v map[string]interface{}, maps map[string]string) map[string]interface{} {
+	if len(maps) == 0 {
+		return Clone(v)
+	}
+	rev := map[string]interface{}{}
+	for fieldName, propertyName := range maps {
+		if fv, ok := v[fieldName]; ok {
+			rev[propertyName] = fv
+		}
+	}
+	return rev
+}
+func Pack(val map[string]interface{}) {
+	list := []string{}
+	for k, v := range val {
+		if v == nil {
+			list = append(list, k)
+		}
+	}
+	for _, k := range list {
+		delete(val, k)
+	}
+}
+
 //返回差异部分
 func Changes(v1, v2 map[string]interface{}) (pre, post map[string]interface{}) {
 	if v1 == nil || v2 == nil {
@@ -33,9 +67,9 @@ func Changes(v1, v2 map[string]interface{}) (pre, post map[string]interface{}) {
 	post = Clone(v2)
 	removeList := []string{}
 	//删除pre、post相同的值
-	for k1, v1 := range pre {
-		if v2, ok := post[k1]; ok && valueEqu(v1, v2) {
-			removeList = append(removeList, k1)
+	for k, v := range pre {
+		if sv, ok := post[k]; ok && valueEqu(sv, v) {
+			removeList = append(removeList, k)
 		}
 	}
 	for _, str := range removeList {
