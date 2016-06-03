@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func valueEqu(v1, v2 interface{}) bool {
+func ValueEqu(v1, v2 interface{}) bool {
 
 	if v1 == nil && v2 == nil {
 		return true
@@ -35,7 +35,7 @@ func ValuesByKeys(val map[string]interface{}, keys ...string) []interface{} {
 
 //翻译字段名，如果maps为nil，则原样返回，否则仅返回有对照的属性
 func Trans(v map[string]interface{}, maps map[string]string) map[string]interface{} {
-	if len(maps) == 0 {
+	if len(v) == 0 || len(maps) == 0 {
 		return Clone(v)
 	}
 	rev := map[string]interface{}{}
@@ -68,7 +68,7 @@ func Changes(v1, v2 map[string]interface{}) (pre, post map[string]interface{}) {
 	removeList := []string{}
 	//删除pre、post相同的值
 	for k, v := range pre {
-		if sv, ok := post[k]; ok && valueEqu(sv, v) {
+		if sv, ok := post[k]; ok && ValueEqu(sv, v) {
 			removeList = append(removeList, k)
 		}
 	}
@@ -151,6 +151,12 @@ func PickType(rows []map[string]interface{}, keys ...string) map[string]string {
 		}
 	}
 	return r
+}
+func Extend(row1, row2 map[string]interface{}) map[string]interface{} {
+	for k, v := range row2 {
+		row1[k] = v
+	}
+	return row1
 }
 
 //交集，用指定的keys来判断是否相等，返回两个集合交集部分
