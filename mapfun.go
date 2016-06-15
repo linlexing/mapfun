@@ -24,6 +24,16 @@ func ValueEqu(v1, v2 interface{}) bool {
 	}
 }
 
+//v2是否包含在v1中
+func SubOf(v1, v2 map[string]interface{}) bool {
+	for k, v := range v2 {
+		if sv, ok := v1[k]; !ok || !ValueEqu(v, sv) {
+			return false
+		}
+	}
+	return true
+}
+
 //根据指定的key顺序，返回值的数组
 func ValuesByKeys(val map[string]interface{}, keys ...string) []interface{} {
 	rev := []interface{}{}
@@ -78,9 +88,9 @@ func Changes(v1, v2 map[string]interface{}) (pre, post map[string]interface{}) {
 	}
 	return
 }
-func Object(list []string, values []interface{}) map[string]interface{} {
+func Object(keys []string, values []interface{}) map[string]interface{} {
 	r := map[string]interface{}{}
-	for i, v := range list {
+	for i, v := range keys {
 		r[v] = values[i]
 	}
 	return r
