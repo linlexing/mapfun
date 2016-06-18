@@ -1,12 +1,18 @@
 package mapfun
 
 import (
+	"bytes"
+	"encoding/gob"
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strings"
 	"time"
 )
 
+func init() {
+	gob.Register(map[string]interface{}{})
+}
 func ValueEqu(v1, v2 interface{}) bool {
 
 	if v1 == nil && v2 == nil {
@@ -16,9 +22,61 @@ func ValueEqu(v1, v2 interface{}) bool {
 		v1 != nil && v2 == nil {
 		return false
 	}
-	switch tv := v1.(type) {
+	switch tv1 := v1.(type) {
 	case time.Time:
-		return tv.Equal(v2.(time.Time))
+		if tv2, ok := v2.(time.Time); ok {
+			return tv1.Equal(tv2)
+		} else {
+			return false
+		}
+	case string:
+		if tv2, ok := v2.(string); ok {
+			return tv1 == tv2
+		} else {
+			return false
+		}
+	case []byte:
+		if tv2, ok := v2.([]byte); ok {
+			return bytes.Equal(tv1, tv2)
+		} else {
+			return false
+		}
+	case int64:
+		if tv2, ok := v2.(int64); ok {
+			return tv1 == tv2
+		} else {
+			return false
+		}
+	case uint64:
+		if tv2, ok := v2.(uint64); ok {
+			return tv1 == tv2
+		} else {
+			return false
+		}
+	case int32:
+		if tv2, ok := v2.(int32); ok {
+			return tv1 == tv2
+		} else {
+			return false
+		}
+	case uint32:
+		if tv2, ok := v2.(uint32); ok {
+			return tv1 == tv2
+		} else {
+			return false
+		}
+	case float64:
+		if tv2, ok := v2.(float64); ok {
+			return tv1 == tv2
+		} else {
+			return false
+		}
+	case float32:
+		if tv2, ok := v2.(float32); ok {
+			return tv1 == tv2
+		} else {
+			return false
+		}
 	default:
 		return reflect.DeepEqual(v1, v2)
 	}
@@ -56,7 +114,7 @@ func Trans(v map[string]interface{}, maps map[string]string) map[string]interfac
 	}
 	return rev
 }
-func Pack(val map[string]interface{}) {
+func Pack(val map[string]interface{}) map[string]interface{} {
 	list := []string{}
 	for k, v := range val {
 		if v == nil {
@@ -66,6 +124,36 @@ func Pack(val map[string]interface{}) {
 	for _, k := range list {
 		delete(val, k)
 	}
+	return val
+}
+
+//转换int64和time，使其成为string，以便于用json序列化
+func MakeJson(val map[string]interface{}) {
+	for k, v := range val {
+		switch tv := v.(type) {
+		case int64, uint64:
+			val[k] = fmt.Sprintf("%d", tv)
+		case time.Time:
+			val[k] = tv.Format(time.RFC3339)
+		}
+	}
+	return
+}
+func FromBytes(data []byte) (rev map[string]interface{}, err error) {
+	in := bytes.NewBuffer(data)
+	rev = map[string]interface{}{}
+	err = gob.NewDecoder(in).Decode(&rev)
+	return
+}
+
+func Bytes(v map[string]interface{}) (rev []byte, err error) {
+	buf := bytes.NewBuffer(nil)
+	err = gob.NewEncoder(buf).Encode(v)
+	if err != nil {
+		return
+	}
+	rev = buf.Bytes()
+	return
 }
 
 //返回差异部分
@@ -73,8 +161,9 @@ func Changes(v1, v2 map[string]interface{}) (pre, post map[string]interface{}) {
 	if v1 == nil || v2 == nil {
 		return v1, v2
 	}
-	pre = Clone(v1)
-	post = Clone(v2)
+	//一定要Pack，否则nil值会出问题
+	pre = Pack(Clone(v1))
+	post = Pack(Clone(v2))
 	removeList := []string{}
 	//删除pre、post相同的值
 	for k, v := range pre {
