@@ -84,8 +84,11 @@ func ValueEqu(v1, v2 interface{}) bool {
 
 //v2是否包含在v1中
 func SubOf(v1, v2 map[string]interface{}) bool {
+	if v1 == nil && v2 != nil {
+		return false
+	}
 	for k, v := range v2 {
-		if sv, ok := v1[k]; !ok || !ValueEqu(v, sv) {
+		if sv, ok := v1[k]; ok && !ValueEqu(v, sv) || !ok && v != nil {
 			return false
 		}
 	}
@@ -103,7 +106,7 @@ func ValuesByKeys(val map[string]interface{}, keys ...string) []interface{} {
 
 //翻译字段名，如果maps为nil，则原样返回，否则仅返回有对照的属性
 func Trans(v map[string]interface{}, maps map[string]string) map[string]interface{} {
-	if len(v) == 0 || len(maps) == 0 {
+	if len(maps) == 0 {
 		return Clone(v)
 	}
 	rev := map[string]interface{}{}
@@ -157,23 +160,15 @@ func Bytes(v map[string]interface{}) (rev []byte, err error) {
 }
 
 //返回差异部分
-func Changes(v1, v2 map[string]interface{}) (pre, post map[string]interface{}) {
+func Changes(v1, v2 map[string]interface{}) (post map[string]interface{}) {
 	if v1 == nil || v2 == nil {
-		return v1, v2
+		return nil
 	}
-	//一定要Pack，否则nil值会出问题
-	pre = Pack(Clone(v1))
-	post = Pack(Clone(v2))
-	removeList := []string{}
-	//删除pre、post相同的值
-	for k, v := range pre {
-		if sv, ok := post[k]; ok && ValueEqu(sv, v) {
-			removeList = append(removeList, k)
+	post = Clone(v2)
+	for k, v := range v2 {
+		if sv, ok := v1[k]; ok && ValueEqu(sv, v) || !ok && v == nil {
+			delete(post, k)
 		}
-	}
-	for _, str := range removeList {
-		delete(pre, str)
-		delete(post, str)
 	}
 	return
 }
