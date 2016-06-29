@@ -190,7 +190,9 @@ func Has(row map[string]interface{}, keys ...string) bool {
 func Pick(row map[string]interface{}, keys ...string) map[string]interface{} {
 	r := map[string]interface{}{}
 	for _, k := range keys {
-		r[k] = row[k]
+		if _, ok := row[k]; ok {
+			r[k] = row[k]
+		}
 	}
 	return r
 }
