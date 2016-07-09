@@ -301,6 +301,24 @@ func Difference(src, dest []map[string]interface{}, keys []string) (result []map
 	return
 }
 
+//黑名单
+func Omit(data map[string]interface{}, keys ...string) map[string]interface{} {
+	if len(keys) == 0 {
+		return data
+	}
+	rev := map[string]interface{}{}
+	keymaps := map[string]bool{}
+	for _, k := range keys {
+		keymaps[k] = true
+	}
+	for k, v := range data {
+		if _, ok := keymaps[k]; !ok {
+			rev[k] = v
+		}
+	}
+	return rev
+}
+
 //找出某个属性的值
 func Pluck(data []map[string]interface{}, name string) []interface{} {
 	result := []interface{}{}
