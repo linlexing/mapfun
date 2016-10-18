@@ -187,6 +187,25 @@ func Has(row map[string]interface{}, keys ...string) bool {
 	}
 	return true
 }
+
+func Group(vals []interface{}) (result []interface{}) {
+	if vals == nil {
+		return
+	}
+	result = []interface{}{}
+	for _, v := range vals {
+		bfound := false
+		for _, rv := range result {
+			if reflect.DeepEqual(v, rv) {
+				bfound = true
+			}
+		}
+		if !bfound {
+			result = append(result, v)
+		}
+	}
+	return
+}
 func Pick(row map[string]interface{}, keys ...string) map[string]interface{} {
 	r := map[string]interface{}{}
 	for _, k := range keys {
