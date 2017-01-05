@@ -129,6 +129,25 @@ func Pack(val map[string]interface{}) map[string]interface{} {
 	}
 	return val
 }
+func Without(val []interface{}, byRemove ...interface{}) []interface{} {
+	if len(byRemove) == 0 {
+		return val
+	}
+	rev := []interface{}{}
+	for _, one := range val {
+		found := false
+		for _, findVal := range byRemove {
+			if reflect.DeepEqual(one, findVal) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			rev = append(rev, one)
+		}
+	}
+	return rev
+}
 
 //转换int64和time，使其成为string，以便于用json序列化
 func MakeJson(val map[string]interface{}) {
