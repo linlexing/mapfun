@@ -148,6 +148,25 @@ func Without(val []interface{}, byRemove ...interface{}) []interface{} {
 	}
 	return rev
 }
+func WithoutStr(val []string, byRemove ...string) []string {
+	if len(byRemove) == 0 {
+		return val
+	}
+	rev := []string{}
+	for _, one := range val {
+		found := false
+		for _, findVal := range byRemove {
+			if one == findVal {
+				found = true
+				break
+			}
+		}
+		if !found {
+			rev = append(rev, one)
+		}
+	}
+	return rev
+}
 
 //转换int64和time，使其成为string，以便于用json序列化
 func MakeJson(val map[string]interface{}) {
@@ -217,6 +236,28 @@ func Group(vals []interface{}) (result []interface{}) {
 		for _, rv := range result {
 			if reflect.DeepEqual(v, rv) {
 				bfound = true
+				break
+			}
+		}
+		if !bfound {
+			result = append(result, v)
+		}
+	}
+	return
+}
+
+//GroupStr 排重一个字符串数组
+func GroupStr(vals []string) (result []string) {
+	if vals == nil {
+		return
+	}
+	result = []string{}
+	for _, v := range vals {
+		bfound := false
+		for _, rv := range result {
+			if v == rv {
+				bfound = true
+				break
 			}
 		}
 		if !bfound {
