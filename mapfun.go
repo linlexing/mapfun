@@ -13,6 +13,8 @@ import (
 func init() {
 	gob.Register(map[string]interface{}{})
 }
+
+//ValueEqu 判断值相等
 func ValueEqu(v1, v2 interface{}) bool {
 
 	if v1 == nil && v2 == nil {
@@ -26,63 +28,50 @@ func ValueEqu(v1, v2 interface{}) bool {
 	case time.Time:
 		if tv2, ok := v2.(time.Time); ok {
 			return tv1.Equal(tv2)
-		} else {
-			return false
 		}
+
 	case string:
 		if tv2, ok := v2.(string); ok {
 			return tv1 == tv2
-		} else {
-			return false
 		}
+
 	case []byte:
 		if tv2, ok := v2.([]byte); ok {
 			return bytes.Equal(tv1, tv2)
-		} else {
-			return false
 		}
+
 	case int64:
 		if tv2, ok := v2.(int64); ok {
 			return tv1 == tv2
-		} else {
-			return false
 		}
 	case uint64:
 		if tv2, ok := v2.(uint64); ok {
 			return tv1 == tv2
-		} else {
-			return false
 		}
+
 	case int32:
 		if tv2, ok := v2.(int32); ok {
 			return tv1 == tv2
-		} else {
-			return false
 		}
 	case uint32:
 		if tv2, ok := v2.(uint32); ok {
 			return tv1 == tv2
-		} else {
-			return false
 		}
 	case float64:
 		if tv2, ok := v2.(float64); ok {
 			return tv1 == tv2
-		} else {
-			return false
 		}
 	case float32:
 		if tv2, ok := v2.(float32); ok {
 			return tv1 == tv2
-		} else {
-			return false
 		}
 	default:
 		return reflect.DeepEqual(v1, v2)
 	}
+	return false
 }
 
-//v2是否包含在v1中
+//SubOf v2是否包含在v1中
 func SubOf(v1, v2 map[string]interface{}) bool {
 	if v1 == nil && v2 != nil {
 		return false
@@ -95,7 +84,7 @@ func SubOf(v1, v2 map[string]interface{}) bool {
 	return true
 }
 
-//根据指定的key顺序，返回值的数组
+//ValuesByKeys 根据指定的key顺序，返回值的数组
 func ValuesByKeys(val map[string]interface{}, keys ...string) []interface{} {
 	rev := []interface{}{}
 	for _, v := range keys {
@@ -104,7 +93,7 @@ func ValuesByKeys(val map[string]interface{}, keys ...string) []interface{} {
 	return rev
 }
 
-//翻译字段名，如果maps为nil，则原样返回，否则仅返回有对照的属性
+//Trans 翻译字段名，如果maps为nil，则原样返回，否则仅返回有对照的属性
 func Trans(v map[string]interface{}, maps map[string]string) map[string]interface{} {
 	if len(maps) == 0 {
 		return Clone(v)
@@ -117,6 +106,8 @@ func Trans(v map[string]interface{}, maps map[string]string) map[string]interfac
 	}
 	return rev
 }
+
+//Pack 去除value是nil的属性
 func Pack(val map[string]interface{}) map[string]interface{} {
 	list := []string{}
 	for k, v := range val {
@@ -129,6 +120,8 @@ func Pack(val map[string]interface{}) map[string]interface{} {
 	}
 	return val
 }
+
+//Without 从一个数组中删除指定的值
 func Without(val []interface{}, byRemove ...interface{}) []interface{} {
 	if len(byRemove) == 0 {
 		return val
@@ -148,6 +141,8 @@ func Without(val []interface{}, byRemove ...interface{}) []interface{} {
 	}
 	return rev
 }
+
+//WithoutStr 从一个字符串数组中删除指定的字符串
 func WithoutStr(val []string, byRemove ...string) []string {
 	if len(byRemove) == 0 {
 		return val
@@ -168,8 +163,8 @@ func WithoutStr(val []string, byRemove ...string) []string {
 	return rev
 }
 
-//转换int64和time，使其成为string，以便于用json序列化
-func MakeJson(val map[string]interface{}) {
+//MakeJSON 转换int64和time，使其成为string，以便于用json序列化
+func MakeJSON(val map[string]interface{}) {
 	for k, v := range val {
 		switch tv := v.(type) {
 		case int64, uint64:
@@ -180,6 +175,8 @@ func MakeJson(val map[string]interface{}) {
 	}
 	return
 }
+
+//FromBytes 反序列化map
 func FromBytes(data []byte) (rev map[string]interface{}, err error) {
 	in := bytes.NewBuffer(data)
 	rev = map[string]interface{}{}
@@ -187,6 +184,7 @@ func FromBytes(data []byte) (rev map[string]interface{}, err error) {
 	return
 }
 
+//Bytes 序列化map
 func Bytes(v map[string]interface{}) (rev []byte, err error) {
 	buf := bytes.NewBuffer(nil)
 	err = gob.NewEncoder(buf).Encode(v)
@@ -197,7 +195,7 @@ func Bytes(v map[string]interface{}) (rev []byte, err error) {
 	return
 }
 
-//返回差异部分
+//Changes 返回差异部分
 func Changes(v1, v2 map[string]interface{}) (post map[string]interface{}) {
 	if v1 == nil || v2 == nil {
 		return nil
@@ -210,6 +208,8 @@ func Changes(v1, v2 map[string]interface{}) (post map[string]interface{}) {
 	}
 	return
 }
+
+//Object 根据名称和值列表，组装map
 func Object(keys []string, values []interface{}) map[string]interface{} {
 	r := map[string]interface{}{}
 	for i, v := range keys {
@@ -217,6 +217,8 @@ func Object(keys []string, values []interface{}) map[string]interface{} {
 	}
 	return r
 }
+
+//Has 判断指定的key是不是在map中存在
 func Has(row map[string]interface{}, keys ...string) bool {
 	for _, k := range keys {
 		if _, ok := row[k]; !ok {
@@ -226,6 +228,7 @@ func Has(row map[string]interface{}, keys ...string) bool {
 	return true
 }
 
+//Group 分类汇总一个数组，重复值只返回一个
 func Group(vals []interface{}) (result []interface{}) {
 	if vals == nil {
 		return
@@ -266,6 +269,8 @@ func GroupStr(vals []string) (result []string) {
 	}
 	return
 }
+
+//Pick 属性白名单
 func Pick(row map[string]interface{}, keys ...string) map[string]interface{} {
 	r := map[string]interface{}{}
 	for _, k := range keys {
@@ -275,6 +280,8 @@ func Pick(row map[string]interface{}, keys ...string) map[string]interface{} {
 	}
 	return r
 }
+
+//Values 返回所有的值
 func Values(row map[string]interface{}) []interface{} {
 	r := []interface{}{}
 	for _, v := range row {
@@ -282,16 +289,20 @@ func Values(row map[string]interface{}) []interface{} {
 	}
 	return r
 }
+
+//Keys 返回所有的key
 func Keys(data map[string]interface{}) []string {
 	if data == nil || len(data) == 0 {
 		return nil
 	}
 	result := []string{}
-	for k, _ := range data {
+	for k := range data {
 		result = append(result, k)
 	}
 	return result
 }
+
+//UpperKeys 将所有的Key转换成大写
 func UpperKeys(data map[string]interface{}) map[string]interface{} {
 	r := map[string]interface{}{}
 	for k, v := range data {
@@ -300,7 +311,8 @@ func UpperKeys(data map[string]interface{}) map[string]interface{} {
 	return r
 }
 
-//计算出制定关键字的数据类型
+//PickType 计算出指定key的value的数据类型，返回 STR、INT、FLOAT、DATE之一
+//警告：要取消
 func PickType(rows []map[string]interface{}, keys ...string) map[string]string {
 	r := map[string]string{}
 	for _, k := range keys {
@@ -327,6 +339,8 @@ func PickType(rows []map[string]interface{}, keys ...string) map[string]string {
 	}
 	return r
 }
+
+//Extend 扩展一个map
 func Extend(row1, row2 map[string]interface{}) map[string]interface{} {
 	for k, v := range row2 {
 		row1[k] = v
@@ -334,7 +348,7 @@ func Extend(row1, row2 map[string]interface{}) map[string]interface{} {
 	return row1
 }
 
-//交集，用指定的keys来判断是否相等，返回两个集合交集部分
+//Intersection 交集，用指定的keys来判断是否相等，返回两个集合交集部分
 func Intersection(rows1, rows2 []map[string]interface{}, keys []string) (result1, result2 []map[string]interface{}) {
 	if len(rows1) == 0 || len(rows2) == 0 {
 		return []map[string]interface{}{}, []map[string]interface{}{}
@@ -354,7 +368,7 @@ func Intersection(rows1, rows2 []map[string]interface{}, keys []string) (result1
 	return
 }
 
-//找出src在dest中不存在的记录
+//Difference 找出src在dest中不存在的记录,src、dest可以为nil，注意不是差集，是减集
 func Difference(src, dest []map[string]interface{}, keys []string) (result []map[string]interface{}) {
 	result = []map[string]interface{}{}
 	if len(src) == 0 {
@@ -380,7 +394,7 @@ func Difference(src, dest []map[string]interface{}, keys []string) (result []map
 	return
 }
 
-//黑名单
+//Omit 黑名单
 func Omit(data map[string]interface{}, keys ...string) map[string]interface{} {
 	if len(keys) == 0 {
 		return data
@@ -398,7 +412,7 @@ func Omit(data map[string]interface{}, keys ...string) map[string]interface{} {
 	return rev
 }
 
-//找出某个属性的值
+//Pluck 从数组map中找出某个属性的值
 func Pluck(data []map[string]interface{}, name string) []interface{} {
 	result := []interface{}{}
 	for _, one := range data {
@@ -408,6 +422,8 @@ func Pluck(data []map[string]interface{}, name string) []interface{} {
 	}
 	return result
 }
+
+//Clone 复制一个map
 func Clone(src map[string]interface{}) map[string]interface{} {
 	if src == nil {
 		return nil
@@ -418,6 +434,8 @@ func Clone(src map[string]interface{}) map[string]interface{} {
 	}
 	return r
 }
+
+//FindWhere 根据一个where去搜索
 func FindWhere(src []map[string]interface{}, where map[string]interface{}) map[string]interface{} {
 	for _, row := range src {
 		bHas := true
@@ -433,6 +451,8 @@ func FindWhere(src []map[string]interface{}, where map[string]interface{}) map[s
 	}
 	return nil
 }
+
+//String 可视化一个map
 func String(v map[string]interface{}) string {
 	bys, err := json.MarshalIndent(v, "", "\t")
 	if err != nil {
